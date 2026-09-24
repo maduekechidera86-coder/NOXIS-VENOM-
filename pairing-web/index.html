@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NØXIS VENOM // LINKING HUB</title>
+    <style>
+        :root {
+            --bg-color: #0b0c10;
+            --panel-bg: #1f2833;
+            --accent-green: #00ff66;
+            --accent-purple: #8a2be2;
+            --text-main: #c5c6c7;
+            --text-bright: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            background: linear-gradient(135deg, var(--panel-bg), #121824);
+            border: 2px solid #333;
+            border-radius: 12px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 0 30px rgba(0, 255, 102, 0.1);
+            position: relative;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, transparent, var(--accent-green), transparent, var(--accent-purple));
+            border-radius: 12px;
+            z-index: -1;
+            opacity: 0.4;
+        }
+
+        h1 {
+            color: var(--text-bright);
+            font-size: 24px;
+            text-align: center;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--accent-green);
+            font-size: 12px;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+        }
+
+        .status-box {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid #444;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            background-color: #ff3b30;
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 10px #ff3b30;
+        }
+
+        .status-dot.active {
+            background-color: var(--accent-green);
+            box-shadow: 0 0 10px var(--accent-green);
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            margin-bottom: 8px;
+            color: var(--text-bright);
+            text-transform: uppercase;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid #555;
+            border-radius: 6px;
+            color: var(--text-bright);
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--accent-green);
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: transparent;
+            border: 2px solid var(--accent-green);
+            color: var(--accent-green);
+            font-size: 14px;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.3s;
+            letter-spacing: 1px;
+        }
+
+        button:hover {
+            background-color: var(--accent-green);
+            color: var(--bg-color);
+            box-shadow: 0 0 15px var(--accent-green);
+        }
+
+        .pairing-display {
+            margin-top: 25px;
+            padding: 20px;
+            background: rgba(0, 255, 102, 0.05);
+            border: 1px dashed var(--accent-green);
+            border-radius: 6px;
+            text-align: center;
+            display: none;
+        }
+
+        .pairing-code {
+            font-size: 32px;
+            color: var(--text-bright);
+            font-weight: bold;
+            letter-spacing: 5px;
+            margin: 10px 0;
+        }
+
+        .instructions {
+            margin-top: 25px;
+            font-size: 11px;
+            line-interspace: 1.6;
+            color: #888;
+            border-top: 1px solid #333;
+            padding-top: 15px;
+        }
+
+        .instructions ol {
+            padding-left: 15px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>𓊈⸸𓊉 NØXIS VENOM</h1>
+    <div class="subtitle">System Pairing Portal</div>
+
+    <div class="status-box">
+        <span>CORE SHIELD STATUS:</span>
+        <div>
+            <span style="font-size: 12px; margin-right: 5px;" id="status-text">OFFLINE</span>
+            <span class="status-dot" id="status-indicator"></span>
+        </div>
+    </div>
+
+    <div id="request-form">
+        <div class="input-group">
+            <label for="phone">Terminal Number</label>
+            <input type="text" id="phone" placeholder="e.g., 2348000000000">
+        </div>
+        <button onclick="requestPairing()">Generate Access Code</button>
+    </div>
+
+    <div class="pairing-display" id="code-display">
+        <label>Your Pairing Token</label>
+        <div class="pairing-code" id="token-value">---- ----</div>
+        <p style="font-size: 11px; color: var(--text-main);">Token expires in 2 minutes.</p>
+    </div>
+
+    <div class="instructions">
+        <span>DEPLOYMENT ROUTINE:</span>
+        <ol>
+            <li>Input target terminal number with regional country code.</li>
+            <li>Open target WhatsApp client → Linked Devices.</li>
+            <li>Select "Link with phone number instead" and input token.</li>
+        </ol>
+    </div>
+</div>
+
+<script>
+    function requestPairing() {
+        const num = document.getElementById('phone').value.replace(/\D/g, '');
+        if (!num) {
+            alert('❌ Terminal identifier missing or malformed.');
+            return;
+        }
+        
+        // UI Interaction Simulation - Hook this endpoint up to Express backend route
+        document.getElementById('status-text').innerText = 'PAIRING REQUEST';
+        document.getElementById('status-indicator').className = 'status-dot active';
+        document.getElementById('code-display').style.display = 'block';
+        
+        // Mock generation visualizer
+        document.getElementById('token-value').innerText = 'VX79-N9X2';
+    }
+</script>
+
+</body>
+</html>
