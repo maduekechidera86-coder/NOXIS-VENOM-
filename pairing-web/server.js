@@ -6,7 +6,9 @@ const {
 } = require('@whiskeysockets/baileys');
 
 const app = express();
-const PORT = 8000;
+
+const PORT = process.env.PORT || 8000;
+const SESSION_DIR = path.join(__dirname, 'session');
 
 app.use(express.json());
 app.use(express.static(__dirname));
@@ -18,7 +20,7 @@ async function startWhatsApp() {
   if (sock) return sock;
 
   const { state, saveCreds } =
-    await useMultiFileAuthState(path.join(__dirname, 'session'));
+    await useMultiFileAuthState(SESSION_DIR);
 
   sock = makeWASocket({
     auth: state,
@@ -34,16 +36,27 @@ async function startWhatsApp() {
 
     if (connection === 'close') {
       console.log('🔴 NØXIS VENOM — WhatsApp connection closed');
+
       sock = null;
 
       if (lastDisconnect?.error) {
-        console.log('Reason:', lastDisconnect.error.message);
+        console.log(
+          'Reason:',
+          lastDisconnect.error.message || 'Unknown'
+        );
       }
     }
   });
 
   return sock;
 }
+
+app.get('/api/status', (req, res) => {
+  res.json({
+    bot: 'NØXIS VENOM',
+    whatsapp: sock ? 'connecting' : 'offline'
+  });
+});
 
 app.post('/api/pair', async (req, res) => {
   try {
@@ -57,7 +70,7 @@ app.post('/api/pair', async (req, res) => {
     const phone = String(req.body.phone || '')
       .replace(/\D/g, '');
 
-    if (!phone) {
+    if (!phone || phone.length < 8) {
       return res.status(400).json({
         success: false,
         error: 'Enter a valid phone number.'
@@ -90,17 +103,10 @@ app.post('/api/pair', async (req, res) => {
   }
 });
 
-app.get('/api/status', (req, res) => {
-  res.json({
-    bot: 'NØXIS VENOM',
-    whatsapp: sock ? 'connecting' : 'offline'
-  });
-});
-
-app.listen(PORT, '127.0.0.1', () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log('');
   console.log('𓊈⸸𓊉 NØXIS VENOM');
-  console.log('🕷️ Pairing Web: http://127.0.0.1:' + PORT);
-  console.log('⚡ Backend ready');
+  console.log(`🕷️ Pairing Web running on port ${PORT}`);
+  console.log('⚡ Railway-ready backend');
   console.log('');
 });
